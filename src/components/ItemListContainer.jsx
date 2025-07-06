@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
 import { Link, useParams } from 'react-router-dom';
-import productos from '../data/productos';
 import '../css/style.css';
 
 const ItemListContainer = ({ addToCart, mensaje }) => {
@@ -11,22 +12,25 @@ const ItemListContainer = ({ addToCart, mensaje }) => {
   useEffect(() => {
     setLoading(true);
 
-    // Simulamos fetch con timeout
-    const fetchProductos = new Promise((resolve) => {
-      setTimeout(() => {
+    const productosRef = collection(db, "Daruma-Store");
+
+    getDocs(productosRef)
+      .then((resp) => {
+        const docs = resp.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
         if (categoriaId) {
-          const filtrados = productos.filter(
+          const filtrados = docs.filter(
             (p) => p.categoria.toLowerCase() === categoriaId.toLowerCase()
           );
-          resolve(filtrados);
+          setItems(filtrados);
         } else {
-          resolve(productos);
+          setItems(docs);
         }
-      }, 1000);
-    });
-
-    fetchProductos
-      .then((data) => setItems(data))
+      })
+      .catch((error) => console.error("Error al traer productos:", error))
       .finally(() => setLoading(false));
   }, [categoriaId]);
 
@@ -68,5 +72,7 @@ const ItemListContainer = ({ addToCart, mensaje }) => {
     </div>
   );
 };
+
+
 
 export default ItemListContainer;

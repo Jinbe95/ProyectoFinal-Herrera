@@ -71,14 +71,14 @@ const productos = [
 
 
   {
-    id: 5,
-    nombre: 'Remera Dragon Ball Goku y Bulma',
-    descripcion: descripcion,
-    precio: 25500,
-    categoria: 'Shonen',
-    imagen: '/images/dragonball.webp',
-    imagenTalles: '/images/tabladetalles.jpg',
-  },
+  id: 5,
+  nombre: 'Remera Dragon Ball Goku y Bulma',
+  descripcion: descripcion,
+  precio: 25500,
+  categoria: 'Shonen',
+  imagen: '/images/dragonball.jpg',
+  imagenTalles: '/images/tabladetalles.jpg', 
+  }, 
 
 
   {

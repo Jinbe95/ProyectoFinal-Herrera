@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import productos from '../data/productos';
-import '../css/style.css';
-
-const fetchProductById = (id) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const producto = productos.find(p => p.id === parseInt(id));
-      if (producto) {
-        resolve(producto);
-      } else {
-        reject('Producto no encontrado');
-      }
-    }, 1000);
-  });
-};
+import { useParams } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
+import ItemDetail from './ItemDetail';
 
 const ItemDetailContainer = ({ addToCart }) => {
   const { itemId } = useParams();
@@ -24,53 +12,28 @@ const ItemDetailContainer = ({ addToCart }) => {
 
   useEffect(() => {
     setLoading(true);
-    fetchProductById(itemId)
-      .then(prod => {
-        setProducto(prod);
-        setError(null);
+
+    const docRef = doc(db, 'Daruma-Store', itemId);
+
+    getDoc(docRef)
+      .then((res) => {
+        if (res.exists()) {
+          setProducto({ id: res.id, ...res.data() });
+          setError(null);
+        } else {
+          setError('Producto no encontrado');
+        }
       })
-      .catch(err => {
-        setError(err);
-        setProducto(null);
+      .catch(() => {
+        setError('Error al obtener el producto');
       })
       .finally(() => setLoading(false));
   }, [itemId]);
 
-  // Si está cargando, mostrar mensaje
   if (loading) return <p>Cargando producto...</p>;
   if (error) return <p>{error}</p>;
 
-return (
-    <div className='textos item-detail-container'>
-      <Link to="/" className="button volver-button">Volver</Link>
-
-      <h2>{producto.nombre}</h2>
-
-      <img
-        src={producto.imagen}
-        alt={producto.nombre}
-        className="producto-imagen detalle-imagen"
-      />
-
-      <p className="descripcion">{producto.descripcion}</p>
-
-      {producto.imagenTalles && (
-        <div className="tabla-talles">
-          <h3>Tabla de talles</h3>
-          <img
-            src={producto.imagenTalles}
-            alt="Tabla de talles"
-            className="tabla-talles-imagen"
-          />
-        </div>
-      )}
-
-      <p className="precio">Precio: ${producto.precio}</p>
-
-      <button className="button" onClick={() => addToCart(producto)}>Agregar al carrito</button>
-    </div>
-  );
+  return <ItemDetail producto={producto} addToCart={addToCart} />;
 };
 
 export default ItemDetailContainer;
-
